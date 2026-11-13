@@ -18,6 +18,8 @@ public class InventorySystem : MonoBehaviour
     public GameObject pickupAlert;
     public Text pickupName;
     public Image pickupImage;
+    [SerializeField, Min(0f)] private float pickupPopupDuration = 3f;
+    private Coroutine pickupPopupCoroutine;
 
     private void Awake()
     {
@@ -34,6 +36,7 @@ public class InventorySystem : MonoBehaviour
     void Start()
     {
         isOpen = false;
+        pickupAlert.SetActive(false);
 
         PopulateSlotList();
     }
@@ -90,10 +93,23 @@ public class InventorySystem : MonoBehaviour
 
     void TriggerPickupPopup(string itemName, Sprite itemSprite)
     {
+        if (pickupPopupCoroutine != null)
+        {
+            StopCoroutine(pickupPopupCoroutine);
+        }
+
         pickupAlert.SetActive(true);
 
         pickupName.text = itemName;
         pickupImage.sprite = itemSprite;
+        pickupPopupCoroutine = StartCoroutine(HidePickupPopup());
+    }
+
+    private IEnumerator HidePickupPopup()
+    {
+        yield return new WaitForSecondsRealtime(pickupPopupDuration);
+        pickupAlert.SetActive(false);
+        pickupPopupCoroutine = null;
     }
 
     private GameObject FindNextEmptySlot()
